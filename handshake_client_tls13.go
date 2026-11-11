@@ -808,7 +808,17 @@ func (hs *clientHandshakeStateTLS13) readServerCertificate() error {
 	// See RFC 8446, Section 4.4.3.
 	// We don't use hs.hello.supportedSignatureAlgorithms because it might
 	// include PKCS#1 v1.5 and SHA-1 if the ClientHello also supported TLS 1.2.
-	if !isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, supportedSignatureAlgorithms(c.vers)) ||
+	allowedSigAlgs := supportedSignatureAlgorithms(c.vers, c.vers)
+	// ducker: ML-DSA stays out of defaultSupportedSignatureAlgorithms, so the
+	// Go-default hello and the recorded handshake tests keep their bytes.
+	// Accept it when the hello we sent offered it, as HelloChrome_155 does.
+	switch certVerify.signatureAlgorithm {
+	case MLDSA44, MLDSA65, MLDSA87:
+		if !isDisabledSignatureAlgorithm(c.vers, certVerify.signatureAlgorithm, false) {
+			allowedSigAlgs = hs.hello.supportedSignatureAlgorithms
+		}
+	}
+	if !isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, allowedSigAlgs) ||
 		!isSupportedSignatureAlgorithm(certVerify.signatureAlgorithm, signatureSchemesForPublicKey(c.vers, c.peerCertificates[0].PublicKey)) {
 		c.sendAlert(alertIllegalParameter)
 		return errors.New("tls: certificate used with invalid signature algorithm")

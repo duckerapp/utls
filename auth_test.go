@@ -168,7 +168,7 @@ func TestLegacyTypeAndHash(t *testing.T) {
 // TestSupportedSignatureAlgorithms checks that all supportedSignatureAlgorithms
 // have valid type and hash information.
 func TestSupportedSignatureAlgorithms(t *testing.T) {
-	for _, sigAlg := range supportedSignatureAlgorithms(VersionTLS12) {
+	for _, sigAlg := range supportedSignatureAlgorithms(VersionTLS12, VersionTLS13) {
 		sigType, hash, err := typeAndHashFromSignatureScheme(sigAlg)
 		if err != nil {
 			t.Errorf("%v: unexpected error: %v", sigAlg, err)
@@ -176,7 +176,7 @@ func TestSupportedSignatureAlgorithms(t *testing.T) {
 		if sigType == 0 {
 			t.Errorf("%v: missing signature type", sigAlg)
 		}
-		if hash == 0 && sigAlg != Ed25519 {
+		if hash == 0 && sigAlg != Ed25519 && sigAlg != MLDSA44 && sigAlg != MLDSA65 && sigAlg != MLDSA87 {
 			t.Errorf("%v: missing hash", sigAlg)
 		}
 	}

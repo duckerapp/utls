@@ -250,8 +250,8 @@ func (c *Conn) makeClientHelloForApplyPreset() (*clientHelloMsg, *keySharePrivat
 	}
 
 	if maxVersion >= VersionTLS12 {
-		hello.supportedSignatureAlgorithms = supportedSignatureAlgorithms(minVersion)
-		hello.supportedSignatureAlgorithmsCert = supportedSignatureAlgorithmsCert()
+		hello.supportedSignatureAlgorithms = supportedSignatureAlgorithms(minVersion, maxVersion)
+		hello.supportedSignatureAlgorithmsCert = supportedSignatureAlgorithmsCert(minVersion, maxVersion)
 	}
 
 	var keyShareKeys *keySharePrivateKeys
